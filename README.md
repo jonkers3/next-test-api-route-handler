@@ -591,37 +591,28 @@ Check out [the tests][9] for more examples.
 
 > Further documentation can be found under [`docs/`][docs].
 
-This is a [dual CJS2/ES module][dual-module] package. That means this package
-exposes both CJS2 and ESM (treeshakable and non-treeshakable) entry points.
+This is a [CJS2 package][cjs-mojito] with [statically-analyzable
+exports][commonjs-static] built for `node@>=v14-lts`. That means both CJS2 (via
+`require(...)`) and ESM (via `import { ... } from ...` or `await import(...)`)
+will load this package from the same entry points when using Node. This has
+several benefits, the foremost being: 1) less code shipped/smaller package
+size, 2) avoiding [dual package hazard][dual-package-hazard] entirely, and 3)
+less complex/fragile build process.
 
-Loading this package via `require(...)` will cause Node and some bundlers to use
-the [CJS2 bundle][cjs2] entry point. This can reduce the efficacy of [tree
-shaking][tree-shaking]. Alternatively, loading this package via
-`import { ... } from ...` or `import(...)` will cause Node (and other JS
-runtimes) to use the non-treeshakable ESM entry point in [versions that support
-it][node-esm-support]. Modern bundlers like Webpack and Rollup will use the
-treeshakable ESM entry point. Hence, using the `import` syntax is the modern,
-preferred choice.
-
-For backwards compatibility with Node versions < 14,
-[`package.json`][package-json] retains the [`main`][exports-main-key] key, which
-points to the CJS2 entry point explicitly (using the .js file extension). For
-Node versions > 14, [`package.json`][package-json] includes the more modern
-[`exports`][exports-main-key] key. For bundlers, [`package.json`][package-json]
-includes the bundler-specific [`module`][module-key] key (eventually superseded
-by [`exports['.'].module`][exports-module-key]), which points to ESM source
-loosely compiled specifically to support [tree shaking][tree-shaking].
+For bundlers like Webpack and Rollup, each entry point (i.e. `ENTRY`) in
+[`package.json`'s `exports[ENTRY]`][package-json] object includes an
+[`exports[ENTRY].module`][exports-module-key] key pointing to
+[tree-shakable][tree-shaking] ESM source. Additionally, for TypeScript and IDEs,
+each object includes an [`exports[ENTRY].types`][exports-types-key] key pointing
+to its respective TypeScript declarations file. There may be [other
+keys][package-json] for [other runtimes][exports-conditions] as well, including
+`node` and `browser`. Finally, [`package.json`][package-json] also includes the
+[`sideEffects`][side-effects-key] key, which is `false` for optimal [tree
+shaking][tree-shaking].
 
 Though [`package.json`][package-json] includes
-[`{ "type": "commonjs"}`][local-pkg], note that the ESM entry points are ES
-module (`.mjs`) files. [`package.json`][package-json] also includes the
-[`sideEffects`][side-effects-key] key, which is `false` for [optimal tree
-shaking][tree-shaking], and the `types` key, which points to a TypeScript
-declarations file.
-
-Additionally, this package does maintain shared state (i.e. memoized imports,
-stateful error handling); regardless, it does not exhibit the [dual package
-hazard][hazard].
+[`{ "type": "commonjs" }`][local-pkg], note that the ESM entry points are ES
+module (`.mjs`) files.
 
 ### License
 
@@ -690,23 +681,21 @@ information.
 [pr-compare]: https://github.com/Xunnamius/next-test-api-route-handler/compare
 [contributing]: CONTRIBUTING.md
 [support]: .github/SUPPORT.md
-[cjs2]: https://webpack.js.org/configuration/output/#module-definition-systems
-[dual-module]:
-  https://github.com/nodejs/node/blob/8d8e06a345043bec787e904edc9a2f5c5e9c275f/doc/api/packages.md#dual-commonjses-module-packages
-[exports-main-key]:
-  https://github.com/nodejs/node/blob/8d8e06a345043bec787e904edc9a2f5c5e9c275f/doc/api/packages.md#package-entry-points
-[hazard]:
-  https://github.com/nodejs/node/blob/8d8e06a345043bec787e904edc9a2f5c5e9c275f/doc/api/packages.md#dual-package-hazard
+[cjs-mojito]:
+  https://dev.to/jakobjingleheimer/configuring-commonjs-es-modules-for-nodejs-12ed#publish-only-a-cjs-distribution-with-property-exports
+[commonjs-static]:
+  https://webpack.js.org/configuration/output/#type-commonjs-static
 [local-pkg]:
   https://github.com/nodejs/node/blob/8d8e06a345043bec787e904edc9a2f5c5e9c275f/doc/api/packages.md#type
-[module-key]:
-  https://github.com/nodejs/node-eps/blob/4217dca299d89c8c18ac44c878b5fe9581974ef3/002-es6-modules.md#51-determining-if-source-is-an-es-module
 [exports-module-key]:
   https://webpack.js.org/guides/package-exports/#providing-commonjs-and-esm-version-stateless
-[node-esm-support]:
-  https://medium.com/%40nodejs/node-js-version-14-available-now-8170d384567e#2368
+[exports-types-key]:
+  https://devblogs.microsoft.com/typescript/announcing-typescript-4-5-beta/#packagejson-exports-imports-and-self-referencing
+[exports-conditions]:
+  https://webpack.js.org/guides/package-exports/#reference-syntax
 [side-effects-key]:
   https://webpack.js.org/guides/tree-shaking/#mark-the-file-as-side-effect-free
+[dual-package-hazard]: https://nodejs.org/api/packages.html#dual-package-hazard
 [tree-shaking]: https://webpack.js.org/guides/tree-shaking
 [1]: https://nextjs.org/docs/api-routes/introduction
 [2]: https://nextjs.org/docs/basic-features/typescript#api-routes

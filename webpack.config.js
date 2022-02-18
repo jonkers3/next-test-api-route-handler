@@ -38,19 +38,11 @@ try {
 debug('sanitized process env: %O', sanitizedProcessEnv);
 verifyEnvironment();
 
-const envPlugins = ({ esm /*: boolean */ }) => [
+const envPlugins = () => [
   // ? NODE_ENV is not a "default" (unlike below) but an explicit overwrite
   new DefinePlugin({
     'process.env.NODE_ENV': JSON.stringify(nodeEnv)
   }),
-  // ? NODE_ESM is true when we're compiling in ESM mode (useful in source)
-  ...(esm
-    ? [
-        new DefinePlugin({
-          'process.env.NODE_ESM': String(esm)
-        })
-      ]
-    : []),
   // ? Load our .env results as the defaults (overridden by process.env)
   new EnvironmentPlugin({ ...sanitizedEnv, ...sanitizedProcessEnv }),
   // ? Create shim process.env for undefined vars
@@ -59,22 +51,22 @@ const envPlugins = ({ esm /*: boolean */ }) => [
   new DefinePlugin({ 'process.env': '{}' })
 ];
 
-const externals = ({ esm /*: boolean */ }) => [
+const externals = () => [
   'next-server/dist/server/api-utils.js',
-  nodeExternals({ importType: esm ? 'node-commonjs' : 'commonjs' }),
+  nodeExternals({ importType: 'commonjs' }),
   ({ request }, cb) => {
     if (request == 'package') {
       // ? Externalize special "package" (alias of package.json) imports
-      cb(null, `${esm ? 'node-commonjs' : 'commonjs'} ${pkgName}/package.json`);
+      cb(null, `commonjs ${pkgName}/package.json`);
     } else if (/\.json$/.test(request)) {
       // ? Externalize all other .json imports
-      cb(null, `${esm ? 'node-commonjs' : 'commonjs'} ${request}`);
+      cb(null, `commonjs ${request}`);
     } else cb();
   }
 ];
 
-const libCjsConfig = {
-  name: 'cjs',
+const libCjsStaticConfig = {
+  name: 'cjs-static',
   mode: 'production',
   target: 'node',
   node: false,
@@ -83,15 +75,15 @@ const libCjsConfig = {
 
   output: {
     filename: 'index.js',
-    path: `${__dirname}/dist`,
+    path: `${__dirname}/dist/cjs-static`,
     // ! ▼ Only required for libraries
-    // ! ▼ Note: ESM outputs are handled by Babel (bundle) and Webpack (below)
+    // ! ▼ Note: ESM outputs (esm-shakable) are handled by Babel
     library: {
-      type: 'commonjs2'
+      type: 'commonjs-static'
     }
   },
 
-  externals: externals({ esm: false }),
+  externals: externals(),
   externalsPresets: { node: true },
 
   stats: {
@@ -111,54 +103,7 @@ const libCjsConfig = {
     rules: [{ test: /\.(ts|js)x?$/, loader: 'babel-loader', exclude: /node_modules/ }]
   },
   optimization: { usedExports: true },
-  plugins: [...envPlugins({ esm: false })]
-};
-
-const libEsmConfig = {
-  name: 'esm',
-  mode: 'production',
-  target: 'node',
-  node: false,
-
-  entry: `${__dirname}/src/index.ts`,
-
-  output: {
-    module: true,
-    filename: 'index.mjs',
-    path: `${__dirname}/dist/esm`,
-    chunkFormat: 'module',
-    // ! ▼ Only required for libraries
-    // ! ▼ Note: ESM outputs are handled by Babel ONLY!
-    library: {
-      type: 'module'
-    }
-  },
-
-  experiments: {
-    outputModule: true
-  },
-
-  externals: externals({ esm: true }),
-  externalsPresets: { node: true },
-
-  stats: {
-    orphanModules: true,
-    providedExports: true,
-    usedExports: true,
-    errorDetails: true
-  },
-
-  resolve: {
-    extensions: ['.ts', '.wasm', '.mjs', '.cjs', '.js', '.json'],
-    // ! If changed, also update these aliases in tsconfig.json,
-    // ! jest.config.js, next.config.ts, and .eslintrc.js
-    alias: IMPORT_ALIASES
-  },
-  module: {
-    rules: [{ test: /\.(ts|js)x?$/, loader: 'babel-loader', exclude: /node_modules/ }]
-  },
-  optimization: { usedExports: true },
-  plugins: [...envPlugins({ esm: true })]
+  plugins: [...envPlugins()]
 };
 
 const externalsConfig = {
@@ -176,7 +121,7 @@ const externalsConfig = {
     path: `${__dirname}/external-scripts/bin`
   },
 
-  externals: externals({ esm: false }),
+  externals: externals(),
   externalsPresets: { node: true },
 
   stats: {
@@ -203,13 +148,13 @@ const externalsConfig = {
   },
   optimization: { usedExports: true },
   plugins: [
-    ...envPlugins({ esm: false }),
+    ...envPlugins(),
     // * ▼ For non-bundled externals, make entry file executable w/ shebang
     new BannerPlugin({ banner: '#!/usr/bin/env node', raw: true, entryOnly: true })
   ]
 };
 
-/* const cliConfig = {
+const cliConfig = {
   name: 'cli',
   mode: 'production',
   target: 'node',
@@ -222,7 +167,7 @@ const externalsConfig = {
     path: `${__dirname}/dist`
   },
 
-  externals: externals({ esm: false }),
+  externals: externals(),
   externalsPresets: { node: true },
 
   stats: {
@@ -243,11 +188,12 @@ const externalsConfig = {
   },
   optimization: { usedExports: true },
   plugins: [
-    ...envPlugins({ esm: false }),
+    ...envPlugins(),
     // * ▼ For bundled CLI applications, make entry file executable w/ shebang
     new BannerPlugin({ banner: '#!/usr/bin/env node', raw: true, entryOnly: true })
   ]
-}; */
+};
 
-module.exports = [libCjsConfig, libEsmConfig, externalsConfig /*, cliConfig*/];
+void cliConfig;
+module.exports = [libCjsStaticConfig, externalsConfig];
 debug('exports: %O', module.exports);

@@ -3,7 +3,7 @@ import debugFactory from 'debug';
 import stripAnsi from 'strip-ansi';
 import { satisfies as satisfiesRange } from 'semver';
 
-import { name as pkgName, version as pkgVersion, main as pkgMain } from 'package';
+import { name as pkgName, version as pkgVersion, exports as pkgExports } from 'package';
 
 import {
   run,
@@ -44,7 +44,7 @@ const NEXT_VERSIONS_UNDER_TEST = satisfiesRange(process.versions.node, '<15') ?
   ['next@latest']   // ? Latest release
 ];
 
-const pkgMainPath = `${__dirname}/../${pkgMain}`;
+const pkgMainPath = `${__dirname}/../${pkgExports['.'].node}`;
 const debug = debugFactory(`${pkgName}:${TEST_IDENTIFIER}`);
 
 // eslint-disable-next-line jest/require-hook

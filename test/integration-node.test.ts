@@ -1,6 +1,6 @@
 /* eslint-disable jest/no-conditional-in-test */
 import debugFactory from 'debug';
-import { name as pkgName, version as pkgVersion, main as pkgMain } from 'package';
+import { name as pkgName, version as pkgVersion, exports as pkgExports } from 'package';
 import {
   run,
   mockFixtureFactory,
@@ -13,7 +13,7 @@ import type { FixtureOptions } from './setup';
 
 const TEST_IDENTIFIER = 'integration-node';
 
-const pkgMainPath = `${__dirname}/../${pkgMain}`;
+const pkgMainPath = `${__dirname}/../${pkgExports['.'].node}`;
 const debug = debugFactory(`${pkgName}:${TEST_IDENTIFIER}`);
 const nodeVersion = process.env.MATRIX_NODE_VERSION || process.version;
 

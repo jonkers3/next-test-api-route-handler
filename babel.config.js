@@ -7,15 +7,6 @@ const NODE_LTS = 'maintained node versions';
 const pkgName = require('./package.json').name;
 const debug = require('debug')(`${pkgName}:babel-config`);
 
-// ? Fix relative local imports referencing package.json (.dist/bundle/...)
-const transformRenameImport = [
-  'transform-rename-import',
-  {
-    // ? See: https://bit.ly/38hFTa8
-    replacements: [{ original: 'package', replacement: `${pkgName}/package.json` }]
-  }
-];
-
 debug('NODE_ENV: %O', process.env.NODE_ENV);
 
 module.exports = {
@@ -72,11 +63,10 @@ module.exports = {
         ['@babel/preset-env', { targets: { node: true } }],
         ['@babel/preset-typescript', { allowDeclareFields: true }]
         // ? Minification is handled by Webpack
-      ],
-      plugins: [transformRenameImport]
+      ]
     },
-    // * Used for compiling ESM code output in ./dist/esm
-    esm: {
+    // * Used for compiling tree shakable ESM code output in ./dist/esm-shakable
+    'esm-shakable': {
       presets: [
         [
           '@babel/preset-env',
@@ -88,26 +78,20 @@ module.exports = {
         ],
         ['@babel/preset-typescript', { allowDeclareFields: true }]
         // ? Minification is handled by Webpack
-      ]
-    },
-    // * Used for compiling ESM code output in .dist/bundle
-    bundle: {
-      presets: [
-        [
-          '@babel/preset-env',
-          {
-            // ? https://babeljs.io/docs/en/babel-preset-env#modules
-            modules: false,
-            targets: NODE_LTS
-          }
-        ],
-        ['@babel/preset-typescript', { allowDeclareFields: true }]
-        // ? The end user will handle minification
       ],
       plugins: [
         // ? Ensure all local imports without extensions now end in .mjs
         ['add-import-extension', { extension: 'mjs' }],
-        transformRenameImport
+        // ? Fix ESM relative local imports referencing package.json
+        [
+          'transform-rename-import',
+          {
+            // ? See: https://bit.ly/38hFTa8
+            replacements: [
+              { original: 'package', replacement: `${pkgName}/package.json` }
+            ]
+          }
+        ]
       ]
     }
   }

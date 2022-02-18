@@ -35,9 +35,7 @@ const tryImport = ((path: string) => (e: Error) => {
   (tryImport.importErrors = tryImport.importErrors ?? []).push(e);
   /* istanbul ignore next */
   if (typeof __webpack_require__ == 'function') {
-    return process.env.NODE_ESM
-      ? import(/* webpackIgnore: true */ path)
-      : __non_webpack_require__(path);
+    return __non_webpack_require__(path);
   } else if (typeof require == 'function') {
     // ? Node12 does not support dynamic imports, so fall back to require first
     return require(path);
@@ -213,7 +211,7 @@ export async function testApiHandler<NextResponseJsonType = any>({
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           undefined as any,
           !!rejectOnHandlerError
-        ).catch((e) => handleError(res, e, deferredReject));
+        ).catch((e: unknown) => handleError(res, e, deferredReject));
       } catch (e) {
         handleError(res, e, deferredReject);
       }
