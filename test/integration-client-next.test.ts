@@ -15,6 +15,8 @@ import {
 
 import type { FixtureOptions } from './setup';
 
+// TODO: stop using jest@next below (2x)
+
 const TEST_IDENTIFIER = 'integration-client-next';
 
 /* prettier-ignore */
@@ -154,7 +156,7 @@ for (const [nextVersion, ...otherPkgVersions] of NEXT_VERSIONS_UNDER_TEST) {
           });
         });`;
 
-        fixtureOptions.npmInstall = ['jest', nextVersion, ...otherPkgVersions];
+        fixtureOptions.npmInstall = ['jest@next', nextVersion, ...otherPkgVersions];
 
         fixtureOptions.runWith = {
           binary: 'npx',
@@ -239,7 +241,7 @@ it('fails fast (no jest timeout) when using incompatible Next.js version', async
     });
   });`;
 
-  fixtureOptions.npmInstall = ['next@8', 'react@^16.6.0', 'jest'];
+  fixtureOptions.npmInstall = ['next@8', 'react@^16.6.0', 'jest@next'];
   fixtureOptions.runWith = {
     binary: 'npx',
     args: ['jest'],
