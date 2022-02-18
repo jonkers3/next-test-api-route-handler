@@ -592,7 +592,7 @@ Check out [the tests][9] for more examples.
 > Further documentation can be found under [`docs/`][docs].
 
 This is a [CJS2 package][cjs-mojito] with [statically-analyzable
-exports][commonjs-static] built for `node@>=v14-lts`. That means both CJS2 (via
+exports][commonjs-static] built for Node14 and above. That means both CJS2 (via
 `require(...)`) and ESM (via `import { ... } from ...` or `await import(...)`)
 will load this package from the same entry points when using Node. This has
 several benefits, the foremost being: 1) less code shipped/smaller package
