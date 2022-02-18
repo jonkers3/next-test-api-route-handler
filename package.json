@@ -28,16 +28,21 @@
   "type": "commonjs",
   "exports": {
     ".": {
-      "import": "./dist/esm/index.mjs",
-      "require": "./dist/index.js",
-      "default": "./dist/index.js"
+      "types": "./dist/types/src/index.d.ts",
+      "module": "./dist/esm-shakable/index.mjs",
+      "node": "./dist/cjs-static/index.js",
+      "default": "./dist/esm-shakable/index.mjs"
     },
     "./package": "./package.json",
     "./package.json": "./package.json"
   },
-  "main": "./dist/index.js",
-  "module": "./dist/bundle/index.mjs",
-  "types": "./dist/types/src/index.d.ts",
+  "typesVersions": {
+    "*": {
+      "*": [
+        "dist/types/src/index.d.ts"
+      ]
+    }
+  },
   "files": [
     "/dist",
     "/LICENSE",
