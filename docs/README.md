@@ -57,7 +57,7 @@ The parameters expected by `testApiHandler`.
 
 #### Defined in
 
-[index.ts:70][5]
+[index.ts:68][5]
 
 ## Functions
 
@@ -87,14 +87,14 @@ testing environment.
 
 #### Defined in
 
-[index.ts:134][6]
+[index.ts:132][6]
 
 [1]: README.md#fetchreturntype
 [2]: README.md#ntarhparameters
 [3]: README.md#testapihandler
 [4]:
-  https://github.com/Xunnamius/next-test-api-route-handler/blob/bcc5dff/src/index.ts#L16
+  https://github.com/Xunnamius/next-test-api-route-handler/blob/4e67406/src/index.ts#L16
 [5]:
-  https://github.com/Xunnamius/next-test-api-route-handler/blob/bcc5dff/src/index.ts#L70
+  https://github.com/Xunnamius/next-test-api-route-handler/blob/4e67406/src/index.ts#L68
 [6]:
-  https://github.com/Xunnamius/next-test-api-route-handler/blob/bcc5dff/src/index.ts#L134
+  https://github.com/Xunnamius/next-test-api-route-handler/blob/4e67406/src/index.ts#L132
