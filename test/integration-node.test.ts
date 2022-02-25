@@ -21,10 +21,13 @@ const nodeVersion = process.env.MATRIX_NODE_VERSION || process.version;
 debug(`nodeVersion: "${nodeVersion}"`);
 
 const fixtureOptions = {
+  performCleanup: true,
   initialFileContents: {
     'package.json': `{"name":"dummy-pkg","dependencies":{"${pkgName}":"${pkgVersion}"}}`
   } as FixtureOptions['initialFileContents'],
   use: [dummyNpmPackageFixture(), npmLinkSelfFixture(), nodeImportTestFixture()]
+} as Partial<FixtureOptions> & {
+  initialFileContents: FixtureOptions['initialFileContents'];
 };
 
 const withMockedFixture = mockFixtureFactory(TEST_IDENTIFIER, fixtureOptions);
